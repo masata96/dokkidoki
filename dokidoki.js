@@ -1,6 +1,6 @@
 ﻿const scenes = {
   start: {
-    text: "今日は上智大学の入学式だ。あそこにいるのは教授かな。",
+    dialogue: "今日は上智大学の入学式だ。あそこにいるのは教授かな。",
     choices: [
       {
         label: "「こんにちは！」と元気に挨拶する",
@@ -12,22 +12,31 @@
         next: "greetShy",
         affectionDiff: +2
       }
-    ]
+    ],
+    background: "images/mainStreet.jpg",
+    character: "images/silhouette/紳士２.png",
+    name: "あなた"
   },
   greetFriendly: {
-    text: "私は情報理工学科教授の角皆です。君には数学者の素質がある！！",
+    dialogue: "私は情報理工学科教授の角皆です。君には数学者の素質がある！！",
     choices: [
       {
         label: "進む",
         next: "entranceCeremony",
         affectionDiff: 0
     }],
-    nextScene: "entranceCeremony",
+    background: "images/mainStreet.jpg",
+    character: "images/tunogai.webp",
+    name: "角皆",
   },
   greetShy: {
     text: "私は情報理工学科教授の角皆です。よろしく",
-    choices: [ /* … */ ],
-    nextScene: "entranceCeremony",
+    choices: [
+            {
+        label: "進む",
+        next: "entranceCeremony",
+        affectionDiff: 0
+    }],
   },
   entranceCeremony: {
     text: "入学式はすごい",
@@ -47,42 +56,41 @@
 };
 
 const state = {
-  currentScene: "start",
+  currentScene: 'start',
   affection: 0
 };
 
-// タグを取得
-const text      = document.getElementById("scene-text");
-const choices   = document.getElementById("choices");
-const affection = document.getElementById("affection");
+    const bgEl = document.getElementById('background');
+    const charEl = document.getElementById('character');
+    const nameEl = document.getElementById('name');
+    const dlgEl  = document.getElementById('dialogue');
+    const affEl  = document.getElementById('affection');
+    const choicesEl = document.getElementById('choices');
 
-// シーンを描画する関数
 function renderScene() {
   const scene = scenes[state.currentScene];
 
-  // テキストを更新
-  text.textContent = scene.text;
+  // 画像、テキスト更新
+  bgEl.src = scene.background;
+  charEl.src = scene.character;
+  nameEl.textContent = scene.name;
+  dlgEl.textContent = scene.dialogue;
+  affEl.textContent = state.affection;
 
-  // 選択肢ボタンをクリア
-  choices.innerHTML = "";
-
-  // 選択肢ごとにボタンを生成
-  scene.choices.forEach(choice => {
-    const btn = document.createElement("button");
-    btn.textContent = choice.label;
-    btn.addEventListener("click", () => {
-      // 好感度を更新
-      state.affection += choice.affectionDiff || 0;
-      affection.textContent = state.affection;
-
-      // シーンを遷移
-      state.currentScene = choice.next;
-      renderScene();
+  choicesEl.innerHTML = '';
+  if (scene.choices && scene.choices.length) {
+    scene.choices.forEach(choice => {
+      const btn = document.createElement('button');
+      btn.textContent = choice.label;
+      btn.onclick = () => {
+        // 好感度を足す、クリックしたら次のシーンに遷移
+        state.affection += choice.affectionDiff || 0;
+        state.currentScene = choice.next;
+        renderScene();
+      };
+      choicesEl.appendChild(btn);
     });
-    choices.appendChild(btn);
-  });
+  }
 }
-
-// ゲーム開始
-renderScene();
-
+// ロードしてからレンダーする
+document.addEventListener('DOMContentLoaded', renderScene);
